@@ -1,8 +1,6 @@
 import { Configuration, OpenAIApi } from 'openai';
 import { config } from 'dotenv';
-import { run } from '@mermaid-js/mermaid-cli';
-import { writeFile, rm } from 'fs/promises';
-import { v4 as uuid } from 'uuid';
+import { convertMarkdownMermaidToImage } from 'markdown-mermaid-exporter';
 
 config();
 
@@ -11,7 +9,7 @@ config();
   const markdown = await generateDesignDiagramMarkdown(prompt);
   const designImagePath = './diagram.png';
 
-  await convertMarkdownToImage(markdown, designImagePath);
+  await convertMarkdownMermaidToImage(markdown, designImagePath);
 })();
 
 async function completeText(
@@ -49,20 +47,4 @@ async function generateDesignDiagramMarkdown(designDescription) {
   `);
 
   return '```mermaid\n' + generatedMarkdown;
-}
-
-async function convertMarkdownToImage(markdown, outputFilepath = 'output.png') {
-  const mermaidMarkdownFile = `./${uuid()}.md`;
-
-  await writeFile(mermaidMarkdownFile, markdown);
-
-  try {
-    console.info(`Converting markdown to image ${outputFilepath}...`);
-    await run(mermaidMarkdownFile, outputFilepath, { puppeteerConfig: { headless: 'new' } });
-  } catch (e) {
-    console.error(`Error converting markdown to image: ${e}`);
-  } finally {
-    console.debug('Removing temporary markdown file...');
-    await rm(mermaidMarkdownFile);
-  }
 }

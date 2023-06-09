@@ -16,13 +16,8 @@
     "software"
   ],
   "dependencies": {
-    "@mermaid-js/mermaid-cli": "^10.2.2",
     "dotenv": "^16.1.4",
-    "mermaid-cli": "^0.2.4",
-    "openai": "^3.2.1",
-    "uuid": "^9.0.0"
-  },
-  "devDependencies": {
-    "@types/uuid": "^9.0.2"
+    "markdown-mermaid-exporter": "^1.0.1",
+    "openai": "^3.2.1"
   }
 }
