@@ -1,46 +1,68 @@
-// @ts-check
-
 import { Configuration, OpenAIApi } from 'openai';
 import { config } from 'dotenv';
 import { run } from '@mermaid-js/mermaid-cli';
-import { writeFileSync } from 'fs';
+import { writeFile, rm } from 'fs/promises';
+import { v4 as uuid } from 'uuid';
 
 config();
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_KEY,
-});
-
 (async () => {
-  const openai = new OpenAIApi(configuration);
-
   const prompt = `I want to design a web system where users can enter text describing their software system and a design diagram will be auto-generated and displayed.`;
+  const markdown = await generateDesignDiagramMarkdown(prompt);
+  const designImagePath = './diagram.png';
 
-  const completion = await openai.createCompletion({
-    model: 'text-davinci-003',
-    max_tokens: 500,
-    temperature: 0.2,
-    prompt: `
-      You are a mermaid markdown generation system.
-      Return only markdown code of a design diagram in mermaid markdown. 
-      Do not respond with any other text.
+  await convertMarkdownToImage(markdown, designImagePath);
+})();
 
-      Input: ${prompt}
-
-      Markdown Code:
-      \`\`\`mermaid
-    `,
+async function completeText(
+  prompt,
+  model = 'text-davinci-003',
+  max_tokens = 500,
+  temperature = 0.2,
+) {
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_KEY,
   });
 
-  const markdownResponse = completion.data.choices[0].text;
-  const diagramMarkdown = '```mermaid\n' + markdownResponse;
-  const mermaidMarkdownFile = './mermaid.md';
+  const openai = new OpenAIApi(configuration);
 
-  writeFileSync(mermaidMarkdownFile, diagramMarkdown);
+  const completion = await openai.createCompletion({
+    model,
+    max_tokens,
+    temperature,
+    prompt,
+  });
+
+  return completion.data.choices[0].text;
+}
+
+async function generateDesignDiagramMarkdown(designDescription) {
+  const generatedMarkdown = await completeText(`
+    You are a mermaid markdown generation system.
+    Return only markdown code of a design diagram in mermaid markdown. 
+    Do not respond with any other text.
+
+    Input: ${designDescription}
+
+    Markdown Code:
+    \`\`\`mermaid
+  `);
+
+  return '```mermaid\n' + generatedMarkdown;
+}
+
+async function convertMarkdownToImage(markdown, outputFilepath = 'output.png') {
+  const mermaidMarkdownFile = `./${uuid()}.md`;
+
+  await writeFile(mermaidMarkdownFile, markdown);
 
   try {
-    await run(mermaidMarkdownFile, 'output.svg');
+    console.info(`Converting markdown to image ${outputFilepath}...`);
+    await run(mermaidMarkdownFile, outputFilepath, { puppeteerConfig: { headless: 'new' } });
   } catch (e) {
-    console.error('Error in GPT markdown response:', e);
+    console.error(`Error converting markdown to image: ${e}`);
+  } finally {
+    console.debug('Removing temporary markdown file...');
+    await rm(mermaidMarkdownFile);
   }
-})();
+}
