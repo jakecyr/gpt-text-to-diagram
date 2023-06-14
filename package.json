@@ -1,6 +1,6 @@
 {
   "name": "gpt-text-to-diagram",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Using OpenAI GPT models, from a description of a software system or other entity diagram, generate a design diagram image or PDF.",
   "main": "dist/src/main.js",
   "bin": "dist/src/main.js",

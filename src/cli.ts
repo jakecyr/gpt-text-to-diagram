@@ -5,6 +5,7 @@ import {
   DEFAULT_MODEL,
   DEFAULT_OUTPUT_FILE,
   DEFAULT_TEMPERATURE,
+  ENV_OPENAI_API_KEY,
 } from './constants';
 import { CLIOptions } from './models/cli-options';
 
@@ -49,6 +50,14 @@ function validateRawCLIOptions(options: OptionValues) {
   const outputFileExtension = options.outputFile.slice(-3);
   const temperature = parseFloat(options.temperature) || DEFAULT_TEMPERATURE;
   const maxTokens = parseInt(options.maxTokens) || DEFAULT_MAX_TOKENS;
+  const openAIKey = options.key || ENV_OPENAI_API_KEY;
+
+  if (!openAIKey) {
+    console.error(
+      `Missing OpenAI API key. Set the environment variable OPENAI_KEY or pass the key into the command with the '-k' flag.`,
+    );
+    process.exit(1);
+  }
 
   if (!['png', 'svg', 'pdf'].includes(outputFileExtension)) {
     console.error(

@@ -8,7 +8,7 @@ Install from npm with `npm install gpt-text-to-diagram`.
 
 ## Usage
 
-1. Set the `OPENAI_KEY` environment variable or pass the key into the `generate` command.
+1. Set the `OPENAI_KEY` environment variable or pass the key into the `generate` command with the `-k` flag.
 2. Run the `gpt-text-to-diagram` command with the following options:
 
     ```bash
