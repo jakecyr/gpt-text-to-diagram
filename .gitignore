@@ -1,5 +1,3 @@
-*.svg
-*.png
-mermaid.md
 .env
 node_modules
+dist
